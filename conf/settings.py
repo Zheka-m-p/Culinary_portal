@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # 'cooking.apps.CookingConfig', # можно через полный путь регать приложение
     'cooking',
 ]
 
