@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<!-- Используем row вместо d-flex.
+     justify-content-between раздвинет 3-ю и 8-ю колонку по краям -->
+<div class="row justify-content-between">
+
+    <!-- Левая колонка (3 части) -->
+    <div class="col-md-3">
+        <div class="list-group shadow-sm">
+            <!-- Кнопка "Все категории" всегда ведет на чистый индекс и имеет класс active -->
+            <a href="{% url 'cooking:index' %}" class="list-group-item list-group-item-action active">
+                Все категории
+            </a>
+
+            {% for category in categories %}
+            <!-- Пока ссылки ведут на ?category=ID -->
+            <a href="?category={{ category.id }}" class="list-group-item list-group-item-action">
+                {{ category.title }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Правая колонка (8 частей) -->
+    <div class="col-md-8">
+        {% for post in posts %}
+        <div class="card mb-4 shadow-sm"> <!-- shadow-sm добавит легкую тень -->
+
+            <!-- Верхняя полоска с категорией -->
+            <div class="card-header text-center text-muted">
+                {{ post.category.title }}
+            </div>
+
+            <!-- Основное тело карточки -->
+            <div class="card-body text-center">
+                <h3 class="card-title">{{ post.title }}</h3>
+                <p class="card-text">{{ post.content|truncatewords:25 }}</p>
+                <!-- Кнопка по центру, px-4 делает её чуть шире -->
+                <a href="#" class="btn btn-primary px-4">Читать</a>
+            </div>
+
+            <!-- Нижняя полоска с датой -->
+            <div class="card-footer text-center text-muted small">
+                <!-- Форматируем дату красиво: 4 апреля 2024 г. 19:52 -->
+                {{ post.created_at|date:"d E Y г. H:i" }}
+            </div>
+
+        </div>
+        {% empty %}
+        <p>Постов пока нет.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

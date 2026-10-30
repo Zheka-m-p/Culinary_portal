@@ -17,6 +17,7 @@ local_settings.py
 # Собранная статика и загрузки (генерируются)
 staticfiles/
 media/
+photos/
 
 # IDE
 .idea/
@@ -30,3 +31,4 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
