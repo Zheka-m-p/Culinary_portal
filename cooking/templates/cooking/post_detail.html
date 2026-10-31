@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.category }} — {{ post.title }}{% endblock %}
+
+{% block content %}
+<!-- gx-5 добавляет отступ между левой и правой колонкой, заменяя пустую колонку -->
+<div class="row gx-5">
+
+    <!-- ЛЕВАЯ КОЛОНКА (8) -->
+    <!-- На ПК col-lg-8, на мобилках займет всю ширину (col-12) -->
+    <div class="col-lg-8 mb-4 mb-lg-0">
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="text-muted fw-bold">{{ post.category.title }}</span>
+                <div>
+                    <a href="#" class="btn btn-dark btn-sm">Удалить</a>
+                    <a href="#" class="btn btn-dark btn-sm">Изменить</a>
+                    <a href="{% url 'cooking:index' %}" class="btn btn-dark btn-sm">Назад</a>
+                </div>
+            </div>
+
+            <!-- Главное фото: img-fluid и max-height ограничат его на любом экране -->
+            {% if post.photo %}
+                <img src="{{ post.photo.url }}" class="card-img-top img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="{{ post.title }}">
+            {% else %}
+                <div class="bg-light text-center py-5">
+                    <h2 class="text-secondary opacity-50 fw-bold m-0">СКОРО<br>ЗДЕСЬ<br>БУДЕТ ФОТО</h2>
+                </div>
+            {% endif %}
+
+            <div class="card-body">
+                <h1 class="card-title mb-4">{{ post.title }}</h1>
+                <!-- Добавил overflow-hidden, чтобы длинный текст не ломал верстку -->
+                <div class="card-text fs-5 overflow-hidden">
+                    {{ post.content|linebreaks }}
+                </div>
+            </div>
+
+            <div class="card-footer bg-white text-muted d-flex justify-content-between small flex-wrap gap-2">
+                <span>{{ post.created_at|date:"d E Y г. H:i" }}</span>
+                <span class="text-primary">Автор: Какой-то человек</span>
+                <span>Просмотры: {{ post.watched }}</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА (4) -->
+    <!-- На ПК col-lg-4, на мобилках встанет под постом. mt-4 дает отступ сверху на мобилке -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <h4 class="mb-3">Похожие рецепты</h4>
+
+        {% for item in related_posts %}
+            <div class="card mb-3 shadow-sm">
+
+                <!-- МАГИЯ BOOTSTRAP ДЛЯ КАРТИНОК -->
+                {% if item.photo %}
+                    <div class="ratio ratio-4x3">
+                        <img src="{{ item.photo.url }}" class="object-fit-cover" alt="{{ item.title }}">
+                    </div>
+                {% else %}
+                    <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center">
+                        <span class="text-muted opacity-50">Нет фото</span>
+                    </div>
+                {% endif %}
+
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <a href="{% url 'cooking:post_detail' item.pk %}" class="btn btn-primary btn-sm w-100">Подробнее</a>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">Похожих рецептов пока нет.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Главная страница{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <!-- Используем row вместо d-flex.
@@ -11,15 +11,19 @@
     <div class="col-md-3">
         <div class="list-group shadow-sm">
             <!-- Кнопка "Все категории" всегда ведет на чистый индекс и имеет класс active -->
-            <a href="{% url 'cooking:index' %}" class="list-group-item list-group-item-action active">
+            <a href="{% url 'cooking:index' %}"
+               class="list-group-item list-group-item-action {% if not active_category %}active{% endif %}">
                 Все категории
             </a>
 
             {% for category in categories %}
+            {% if category.posts.count > 0 %}
             <!-- Пока ссылки ведут на ?category=ID -->
-            <a href="?category={{ category.id }}" class="list-group-item list-group-item-action">
+            <a href="{% url 'cooking:category_list' category.pk %}"
+               class="list-group-item list-group-item-action {% if active_category == category.pk %}active{% endif %}">
                 {{ category.title }}
             </a>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
@@ -39,13 +43,14 @@
                 <h3 class="card-title">{{ post.title }}</h3>
                 <p class="card-text">{{ post.content|truncatewords:25 }}</p>
                 <!-- Кнопка по центру, px-4 делает её чуть шире -->
-                <a href="#" class="btn btn-primary px-4">Читать</a>
+                <a href="{{ post.get_absolute_url }}" class="btn btn-primary px-4">Читать</a>
             </div>
 
             <!-- Нижняя полоска с датой -->
             <div class="card-footer text-center text-muted small">
-                <!-- Форматируем дату красиво: 4 апреля 2024 г. 19:52 -->
-                {{ post.created_at|date:"d E Y г. H:i" }}
+                <!-- Форматируем дату красиво: 29 октября 2026 г. 19:52 -->
+                {{ post.created_at|date:"d E Y г. H:i" }} <span>просмотров: {{ post.watched }}</span>
+
             </div>
 
         </div>

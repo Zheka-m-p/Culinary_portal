@@ -1,3 +1,5 @@
+{% load static %}
+
 <!doctype html>
 <html lang="ru">
 <head>
@@ -8,6 +10,7 @@
       integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
       crossorigin="anonymous">
     <title>{% block title %}Кулинарный сайт{% endblock title%}</title>
+    <link rel="icon" href="{% static 'images/icon-site.jpg' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
 
@@ -18,6 +21,7 @@
 
     <!-- Обернули контент в main + container -->
     <main class="container my-5 flex-grow-1">
+<!--    <main>-->
         {% block content %}
         {% endblock content %}
     </main>
