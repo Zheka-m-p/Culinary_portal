@@ -1,6 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Post
 from django.db.models import F
+from .forms import PostForm
+
 
 def index(request, pk=None):
     '''Для главной страницы с выбором по категориям'''
@@ -36,3 +38,22 @@ def post_detail(request, pk):
     }
 
     return render(request, 'cooking/post_detail.html', context)
+
+
+def add_post(request):
+    '''Добавление статьи от пользователя без админки'''
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = Post.objects.create(**form.cleaned_data)
+            # post.save() # не нужно - дублирует первый способ, лучше сразу писать post.save() - аналогично ↑
+            return redirect('cooking:post_detail', pk=post.pk)
+    else:
+        form = PostForm()
+
+    context = {
+        'form': form,
+        'title': 'Добавить рецепт'
+    }
+
+    return render(request, 'cooking/add_post.html', context)
