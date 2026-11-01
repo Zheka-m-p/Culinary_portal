@@ -1,0 +1,28 @@
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <!-- ВОТ ТУТ ДОБАВЛЕН КЛАСС auto-dismiss -->
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{message.tags}}{% endif %} alert-dismissible fade show auto-dismiss" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Находим все сообщения
+        const alerts = document.querySelectorAll('.auto-dismiss');
+
+        alerts.forEach(function(alert) {
+            // Ждем 4 секунды (4000 миллисекунд)
+            setTimeout(function() {
+                // Плавно скрываем элемент (используем встроенную магию Bootstrap)
+                let bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 30000);
+        });
+    });
+</script>
+
+{% endif %}

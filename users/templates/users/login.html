@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h2 class="mb-0">Войти в аккаунт</h2>
+            </div>
+
+            <div class="card-body">
+                <form action="" method="post">
+                    {% csrf_token %}
+                    {% include 'includes/form_errors.html' %}
+                    {{ form.as_p }}
+                    <button class="btn btn-dark" type="submit">Войти</button>
+                </form>
+            <p class="text-center mt-3 mb-0">
+                Нет аккаунта? <a href="{% url 'users:register' %} ">Зарегистрироваться</a>
+            </p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}

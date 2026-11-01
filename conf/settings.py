@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     # 'cooking.apps.CookingConfig', # можно через полный путь регать приложение
     'cooking',
+    'users',
 ]
 
 MIDDLEWARE = [

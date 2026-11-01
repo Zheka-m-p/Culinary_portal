@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Category, Post
 from django.db.models import F
 from .forms import PostForm
+from django.contrib import messages
 
 
 def index(request, pk=None):
@@ -47,6 +48,7 @@ def add_post(request):
         if form.is_valid():
             post = Post.objects.create(**form.cleaned_data)
             # post.save() # не нужно - дублирует первый способ, лучше сразу писать post.save() - аналогично ↑
+            messages.success(request, 'Вы успешно создали новый рецепт!')
             return redirect('cooking:post_detail', pk=post.pk)
     else:
         form = PostForm()
