@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
 from .models import Category, Post
-from django.db.models import F
+from django.db.models import F, Q
 from .forms import PostForm
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
@@ -60,6 +60,27 @@ class IndexView(ListView):
 
         return context
 
+
+class SearchView(IndexView):
+    '''Поиск по постам (наследуется от IndexView)'''
+    def get_queryset(self):
+        qs = super().get_queryset()  # Берем базовый queryset из IndexView
+        word = self.request.GET.get('q')  # Получаем слово из формы
+
+        if word:
+            # Ищем по названию ИЛИ по содержимому
+            qs = qs.filter(Q(title__icontains=word) | Q(content__icontains=word))
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        word = self.request.GET.get('q')
+        if word:
+            context['title'] = f'Результаты поиска: «{word}»'
+        else:
+            context['title'] = 'Поиск по рецептам'
+        return context
 
 # def post_detail(request, pk):
 #     '''Детальный показ поста'''

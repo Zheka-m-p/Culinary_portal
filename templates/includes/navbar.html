@@ -23,8 +23,8 @@
             </ul>
 
             <!-- Поиск -->
-            <form class="d-flex me-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Поиск" aria-label="Поиск">
+            <form class="d-flex me-3" role="search" method="get" action="{% url 'cooking:search' %}">
+                <input name="q" class="form-control me-2" type="search" placeholder="Поиск" aria-label="Поиск">
                 <button class="btn btn-outline-success" type="submit">Поиск</button>
             </form>
 
