@@ -2,32 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
-from .models import Category, Post
+from .models import Category, Post, Comment
 from django.db.models import F, Q
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView
 
-
-# def index(request, pk=None):
-#     '''Для главной страницы с выбором по категориям'''
-#     categories = Category.objects.all()
-#
-#     if pk:  # Если pk передан (кликнули на категорию)
-#         category = get_object_or_404(Category, id=pk) # Безопасно ищем категорию
-#         posts = Post.objects.filter(category=category)
-#         title = category.title # Берем название категории
-#     else:
-#         posts = Post.objects.all()
-#         title = 'Кулинарный сайт'
-#
-#     context = {
-#         'title': title,
-#         'posts': posts,
-#         'categories': categories,
-#         'active_category': pk,  # <-- Передаем ID активной категории (или None, если главная)
-#     }
-#     return render(request, 'cooking/index.html', context)
 
 class IndexView(ListView):
     '''Класс для отображения главной страницы и страницы категорий'''
@@ -63,6 +43,7 @@ class IndexView(ListView):
 
 class SearchView(IndexView):
     '''Поиск по постам (наследуется от IndexView)'''
+
     def get_queryset(self):
         qs = super().get_queryset()  # Берем базовый queryset из IndexView
         word = self.request.GET.get('q')  # Получаем слово из формы
@@ -82,20 +63,6 @@ class SearchView(IndexView):
             context['title'] = 'Поиск по рецептам'
         return context
 
-# def post_detail(request, pk):
-#     '''Детальный показ поста'''
-#     post = get_object_or_404(Post, pk=pk)
-#     Post.objects.filter(pk=pk).update(watched=F('watched') + 1)
-#     related_posts = Post.objects.exclude(pk=post.pk).order_by('?')[:3] # 3 random поста из этой же категории
-#     # related_posts = Post.objects.filter(category=post.category).exclude(pk=post.pk)[:3]
-#
-#     context = {
-#         'post': post,
-#         'related_posts': related_posts,
-#     }
-#
-#     return render(request, 'cooking/post_detail.html', context)
-
 
 class PostDetailView(DetailView):
     '''Страница поста(статьи-рецепта)'''
@@ -113,27 +80,10 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['related_posts'] = Post.objects.exclude(pk=self.kwargs.get('pk')).order_by('?')[:3]
+        context['comment_form'] = CommentForm()  # форма для коммента добавлена в словарь
+
         return context
 
-
-# def add_post(request):
-#     '''Добавление статьи от пользователя без админки'''
-#     if request.method == 'POST':
-#         form = PostForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             post = Post.objects.create(**form.cleaned_data)
-#             # post.save() # не нужно - дублирует первый способ, лучше сразу писать post.save() - аналогично ↑
-#             messages.success(request, 'Вы успешно создали новый рецепт!')
-#             return redirect('cooking:post_detail', pk=post.pk)
-#     else:
-#         form = PostForm()
-#
-#     context = {
-#         'form': form,
-#         'title': 'Добавить рецепт'
-#     }
-#
-#     return render(request, 'cooking/add_post.html', context)
 
 class PostCreateView(CreateView):
     '''Создание поста через классы'''
@@ -160,3 +110,19 @@ class PostDeleteView(DeleteView):
     template_name = 'cooking/delete_post.html'
     success_url = reverse_lazy('cooking:index')
     # form_class = PostForm # он тут не нужен для удаления поста
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    '''Форма для создания комментария к посту '''
+    model = Comment
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        ''' Находим пост по pk из URL и привязываем автора '''
+        form.instance.post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        '''Возвращаем URL поста + якорь #comments'''
+        return self.object.get_absolute_url() + '#comments'

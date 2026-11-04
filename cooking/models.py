@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 
 class Category(models.Model):
@@ -40,3 +41,23 @@ class Post(models.Model):
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
+
+
+class Comment(models.Model):
+    '''Комменты к постам(рецептам)'''
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, verbose_name='Пост', related_name='comments_post')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор', related_name='comments_author')
+    text = models.TextField(verbose_name='Комментарий')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата редактирования')
+
+    def __str__(self):
+        return self.text
+
+    def get_absolute_url(self):
+        return self.post.get_absolute_url()
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ('created_at',)

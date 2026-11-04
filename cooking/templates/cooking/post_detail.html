@@ -9,22 +9,20 @@
     <!-- ЛЕВАЯ КОЛОНКА (8) -->
     <!-- На ПК col-lg-8, на мобилках займет всю ширину (col-12) -->
     <div class="col-lg-8 mb-4 mb-lg-0">
-        <div class="card shadow-sm">
 
+        <!-- === БЛОК ПОСТА === -->
+        <div class="card shadow-sm mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="text-muted fw-bold">{{ post.category.title }}</span>
                 <div class="d-flex gap-2">
                     <a href="{% url 'cooking:category_list' post.category.pk %}"
                        class="btn btn-outline-secondary btn-sm">Назад</a>
-
                     <a href="{% url 'cooking:update_post' post.pk %}"
                        class="btn btn-warning text-dark btn-sm">Изменить</a>
-
                     <a href="{% url 'cooking:delete_post' post.pk %}" class="btn btn-danger btn-sm">Удалить</a>
                 </div>
             </div>
 
-            <!-- Главное фото: img-fluid и max-height ограничат его на любом экране -->
             {% if post.photo %}
             <img src="{{ post.photo.url }}" class="card-img-top img-fluid w-100"
                  style="max-height: 500px; object-fit: cover;" alt="{{ post.title }}">
@@ -36,7 +34,6 @@
 
             <div class="card-body">
                 <h1 class="card-title mb-4">{{ post.title }}</h1>
-                <!-- Добавил overflow-hidden, чтобы длинный текст не ломал верстку -->
                 <div class="card-text fs-5 overflow-hidden">
                     {{ post.content|linebreaks }}
                 </div>
@@ -44,11 +41,55 @@
 
             <div class="card-footer bg-white text-muted d-flex justify-content-between small flex-wrap gap-2">
                 <span>{{ post.created_at|date:"d E Y г. H:i" }}</span>
-                <span class="text-primary">Автор: Какой-то человек</span>
+                <span class="text-primary">Автор поста: {{ post.author }}</span>
                 <span>Просмотры: {{ post.watched }}</span>
             </div>
-
         </div>
+
+        <!-- === БЛОК КОММЕНТАРИЕВ === -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white" id="comments">
+                <h4 class="mb-0">Комментарии ({{ post.comments_post.count }})</h4>
+            </div>
+
+            <div class="card-body">
+                <!-- Список комментариев -->
+                {% for comment in post.comments_post.all %}
+                <div class="d-flex mb-3 border-bottom pb-3">
+                    <div class="flex-shrink-0">
+                        <!-- Аватарка-заглушка (или можешь вывести первую букву юзера) -->
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px;">
+                            {{ comment.author.username|first|upper }}
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <strong>{{ comment.author.username }}</strong>
+                        <span class="text-muted small ms-2">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                        <p class="mb-0 mt-1">{{ comment.text }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">Пока нет комментариев. Будьте первым!</p>
+                {% endfor %}
+            </div>
+
+            <!-- Форма для добавления -->
+            {% if user.is_authenticated %}
+            <div class="card-footer bg-white">
+                <form method="post" action="{% url 'cooking:add_comment' post.pk %}">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button type="submit" class="btn btn-primary mt-2">Отправить</button>
+                </form>
+            </div>
+            {% else %}
+            <div class="card-footer bg-white text-center">
+                <p class="mb-0"><a href="{% url 'users:login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
 
     <!-- ПРАВАЯ КОЛОНКА (4) -->

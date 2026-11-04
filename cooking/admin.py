@@ -1,9 +1,11 @@
 from django.contrib import admin
-from .models import Category, Post
+from .models import Category, Post, Comment
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'title',)
+
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -15,3 +17,7 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
 
 
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'text', 'created_at')
+    readonly_fields = ('text',)
