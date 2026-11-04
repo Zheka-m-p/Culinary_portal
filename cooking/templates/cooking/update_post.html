@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Редактирование: {{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h2 class="mb-0">Редактировать рецепт</h2>
+            </div>
+
+
+            <div class="card-body">
+                {% if object.photo %}
+                <div class="mb-4 text-center">
+                    <p class="text-muted mb-2">Текущее фото:</p>
+                    <a href="{{ object.photo.url }}" target="_blank" title="Нажмите, чтобы открыть в полном размере">
+                        <img src="{{ object.photo.url }}" alt="{{ object.title }}"
+                             class="img-fluid w-100 rounded shadow-sm"
+                             style="max-height: 400px; object-fit: contain; background-color: #f8f9fa;">
+                    </a>
+                </div>
+                {% endif %}
+
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <button class="btn btn-dark" type="submit">Сохранить изменения</button>
+
+                        <a href="{% url 'cooking:delete_post' post.pk %}" class="btn btn-outline-danger">
+                            Удалить рецепт
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
