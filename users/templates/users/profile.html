@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="row gx-4">
+
+    <!-- ЛЕВАЯ КОЛОНКА (Карточка профиля) -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <!-- Аватарка (заглушка) -->
+                <!-- Если хочешь картинку, используй <img>, пока оставим стилизованный круг -->
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 150px; height: 150px; font-size: 60px;">
+                    {{ user_profile.username|first|upper }}
+                </div>
+
+                <!-- Имя и Ник -->
+                <h4 class="card-title mb-1">{{ user_profile.first_name }} {{ user_profile.last_name }}</h4>
+                <p class="text-muted mb-3">@{{ user_profile.username }}</p>
+
+                <!-- Описание (Заглушка) -->
+                <p class="text-muted small mb-4">
+                    Python Developer <br>
+                    Tashkent, Uzbekistan
+                </p>
+
+                <!-- Кнопки -->
+                <div class="d-flex justify-content-center gap-2 mb-4">
+                    <button class="btn btn-primary px-4">Follow</button>
+                    <button class="btn btn-outline-secondary px-4">Message</button>
+                </div>
+            </div>
+
+            <!-- Социальные сети (Заглушки) -->
+            <ul class="list-group list-group-flush text-start">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted"><i class="bi bi-globe me-2"></i>Website</span>
+                    <span class="text-muted small">Не указан</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted"><i class="bi bi-github me-2"></i>Github</span>
+                    <span class="text-muted small">Не указан</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="text-muted"><i class="bi bi-instagram me-2"></i>Instagram</span>
+                    <span class="text-muted small">Не указан</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА (Инфо и Статьи) -->
+    <div class="col-md-8">
+
+        <!-- Блок с личными данными -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <strong class="text-muted">Full name</strong>
+                        <span>{{ user_profile.first_name }} {{ user_profile.last_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <strong class="text-muted">Email</strong>
+                        <span>{{ user_profile.email|default:"Не указан" }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <strong class="text-muted">Phone</strong>
+                        <span>{{ user_profile.phone|default:'Не указан' }}</span> <!-- Заглушка -->
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <strong class="text-muted">Address</strong>
+                        <span>{{ user_profile.adress|default:'Не указан' }}</span> <!-- Заглушка -->
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-top-0 py-3">
+                <a href="#" class="btn btn-info text-white">Edit(next_update)</a>
+            </div>
+        </div>
+
+        <!-- Блок со статьями -->
+        <h5 class="mb-3 text-muted fw-bold text-center">
+            {% if user == user_profile %}
+                Мои статьи
+            {% else %}
+                Статьи пользователя {{ user_profile.username }}
+            {% endif %}
+        </h5>
+
+         {% for post in posts %}
+        <div class="card shadow-sm mb-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark fw-bold fs-5">
+                    {{post.category}} | {{ post.title }} </a>
+                <span class="text-muted small">
+                    {{ post.created_at|date:"d E Y" }}
+                    <span class="ms-2">👁 {{ post.watched }}</span>
+                </span>
+            </div>
+        </div>
+         {% endfor %}
+
+
+
+    </div>
+</div>
+{% endblock %}

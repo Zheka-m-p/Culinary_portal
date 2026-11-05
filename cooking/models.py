@@ -24,6 +24,7 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='posts',
                                  verbose_name="Категория статьи")
 
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts_user', verbose_name='Автор поста')
     title = models.CharField(max_length=100, verbose_name='Название статьи')
     content = models.TextField(default='Скоро здесь будет статья', verbose_name="Содержимое статьи")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")

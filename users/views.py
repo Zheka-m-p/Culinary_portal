@@ -1,7 +1,10 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from .forms import LoginForm, RegistrationForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from django.contrib.auth.models import User
+from cooking.models import Post
 
 
 
@@ -47,3 +50,14 @@ def user_register(request):
     context = {'form': form, 'title': 'Регистрация пользователя'}
 
     return render(request, 'users/register.html', context)
+
+
+def user_profile(request, user_id):
+    user_profile = User.objects.get(pk=user_id)
+    posts = Post.objects.filter(author=user_profile).order_by('-created_at')
+    context = {
+        'user_profile': user_profile,
+        'posts': posts,
+    }
+
+    return render(request, 'users/profile.html', context)

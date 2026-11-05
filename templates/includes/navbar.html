@@ -46,7 +46,7 @@
                     </a>
                     <!-- dropdown-menu-end чтобы меню не улетало за экран -->
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Моя страница</a></li>
+                        <li><a class="dropdown-item" href="{% url 'users:user_profile' user.pk %}">Моя страница</a></li>
                         <li><a class="dropdown-item" href="{% url 'cooking:add_post' %}">Добавить статью</a></li>
                         <li>
                             <hr class="dropdown-divider">
