@@ -85,7 +85,7 @@ class PostDetailView(DetailView):
         return context
 
 
-class PostCreateView(CreateView):
+class PostCreateView(LoginRequiredMixin,CreateView):
     '''Создание поста через классы'''
     model = Post
     form_class = PostForm
