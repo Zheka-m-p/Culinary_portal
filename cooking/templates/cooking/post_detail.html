@@ -16,10 +16,13 @@
                 <span class="text-muted fw-bold">{{ post.category.title }}</span>
                 <div class="d-flex gap-2">
                     <a href="{% url 'cooking:category_list' post.category.pk %}"
-                       class="btn btn-outline-secondary btn-sm">Назад</a>
-                    <a href="{% url 'cooking:update_post' post.pk %}"
-                       class="btn btn-warning text-dark btn-sm">Изменить</a>
-                    <a href="{% url 'cooking:delete_post' post.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                       class="btn btn-outline-secondary btn-sm">Назад к категории</a>
+
+                    {% if user == post.author %}
+                        <a href="{% url 'cooking:update_post' post.pk %}" class="btn btn-warning text-dark btn-sm">Изменить</a>
+                        <a href="{% url 'cooking:delete_post' post.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                    {% endif %}
+
                 </div>
             </div>
 

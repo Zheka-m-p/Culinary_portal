@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 
@@ -93,8 +93,13 @@ class PostCreateView(CreateView):
     success_url = reverse_lazy('cooking:index')
     template_name = 'cooking/add_post.html'
 
+    def form_valid(self, form):
+        '''АВтоматом добавляем юзера как автора поста(т.к. новое поле было ещё)'''
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
-class PostUpdateView(UpdateView):
+
+class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin,UpdateView):
     '''Для редактирования статьи'''
     model = Post
     form_class = PostForm
@@ -102,14 +107,24 @@ class PostUpdateView(UpdateView):
     template_name = 'cooking/update_post.html'
     # редирект после направления уже есть (метод get_absolute_url() в модели Post)
 
+    def test_func(self):
+        '''проверяем права доступа на обновление поста'''
+        post = self.get_object() # Получаем пост, который пытаемся редактировать
+        return self.request.user == post.author # Возвращаем True, если текущий юзер == автор поста
 
-class PostDeleteView(DeleteView):
+
+class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     '''Для удаления поста'''
     model = Post
     context_object_name = 'post'
     template_name = 'cooking/delete_post.html'
     success_url = reverse_lazy('cooking:index')
     # form_class = PostForm # он тут не нужен для удаления поста
+
+    def test_func(self):
+        '''Проверка прав доступа на удаление поста'''
+        post = self.get_object()
+        return self.request.user == post.author
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):

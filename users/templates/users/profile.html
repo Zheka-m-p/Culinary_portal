@@ -22,7 +22,7 @@
                 <!-- Описание (Заглушка) -->
                 <p class="text-muted small mb-4">
                     Python Developer <br>
-                    Tashkent, Uzbekistan
+                    
                 </p>
 
                 <!-- Кнопки -->
@@ -59,7 +59,12 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item d-flex justify-content-between py-3">
                         <strong class="text-muted">Full name</strong>
-                        <span>{{ user_profile.first_name }} {{ user_profile.last_name }}</span>
+                        {% if user_profile.first_name or user_profile.last_name %}
+                            <span>{{ user_profile.first_name }} {{ user_profile.last_name }}</span>
+                        {% else %}
+                            <span>Не указан</span>
+                        {% endif %}
+
                     </li>
                     <li class="list-group-item d-flex justify-content-between py-3">
                         <strong class="text-muted">Email</strong>
@@ -89,18 +94,36 @@
             {% endif %}
         </h5>
 
-         {% for post in posts %}
-        <div class="card shadow-sm mb-2">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark fw-bold fs-5">
-                    {{post.category}} | {{ post.title }} </a>
-                <span class="text-muted small">
-                    {{ post.created_at|date:"d E Y" }}
-                    <span class="ms-2">👁 {{ post.watched }}</span>
-                </span>
+        {% for post in posts %}
+<div class="card shadow-sm mb-2">
+    <div class="card-body">
+        <div class="row align-items-center">
+
+            <!-- СЛЕВА: Название (занимает половину ширины - 6 колонок) -->
+            <div class="col-md-6 text-start">
+                <a href="{{ post.get_absolute_url }}" class="text-decoration-none text-dark fw-bold fs-6">
+                    {{ post.category.title }} | {{ post.title }}
+                </a>
             </div>
+
+            <!-- ПО ЦЕНТРУ: Дата и просмотры (3 колонки) -->
+            <div class="col-md-3 text-center text-muted small text-nowrap">
+                {{ post.created_at|date:"d E Y" }}
+                <span class="ms-2">👁 {{ post.watched }}</span>
+            </div>
+
+            <!-- СПРАВА: Кнопки (3 колонки) -->
+            <div class="col-md-3 text-end">
+                {% if user == post.author %}
+                    <a href="{% url 'cooking:update_post' post.pk %}" class="btn btn-warning text-dark btn-sm">Изменить</a>
+                    <a href="{% url 'cooking:delete_post' post.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                {% endif %}
+            </div>
+
         </div>
-         {% endfor %}
+    </div>
+</div>
+{% endfor %}
 
 
 
