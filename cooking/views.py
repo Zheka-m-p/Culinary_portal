@@ -165,14 +165,18 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
 
+
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    '''Удаление комментария (автором коммента или автором поста)'''
     model = Comment
 
     def test_func(self):
-        return self.request.user == self.get_object().author
+        '''# Разрешаем, если ты автор комментария ИЛИ автор поста, к которому он привязан'''
+        comment = self.get_object()
+        return self.request.user == comment.author or self.request.user == comment.post.author
 
-    # Просто удаляем и возвращаем успех
     def form_valid(self, form):
+        '''# Просто удаляем и возвращаем JSON для AJAX'''
         self.object = self.get_object()
         self.object.delete()
         return JsonResponse({'success': True})

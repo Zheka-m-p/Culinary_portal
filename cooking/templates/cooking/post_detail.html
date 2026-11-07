@@ -73,32 +73,31 @@
                             <div>
                                 <strong>{{ comment.author.username }}</strong>
                                 <span class="text-muted small ms-2">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
-                                <!-- Бейдж "изменено" (скрыт по умолчанию, JS покажет его) -->
                                 <span class="text-muted small ms-1 comment-edited-badge" style="display: none;">(изменено)</span>
                             </div>
 
-                            <!-- Кнопки видны только автору -->
-                            {% if user == comment.author %}
                             <div class="text-nowrap">
-                                <!-- Кнопка редактирования -->
+                                <!-- Кнопка ИЗМЕНИТЬ (только для автора коммента) -->
+                                {% if user == comment.author %}
                                 <button class="btn btn-sm text-warning p-0 me-2 edit-comment-btn"
                                         data-comment-id="{{ comment.pk }}"
                                         data-comment-text="{{ comment.text }}"
                                         data-update-url="{% url 'cooking:update_comment' comment.pk %}">
                                     <i class="bi bi-pencil"></i>
                                 </button>
+                                {% endif %}
 
-                                <!-- Кнопка удаления -->
+                                <!-- Кнопка УДАЛИТЬ (для автора коммента ИЛИ автора поста) -->
+                                {% if user == comment.author or user == post.author %}
                                 <button class="btn btn-sm text-danger p-0 delete-comment-btn"
                                         data-comment-id="{{ comment.pk }}"
                                         data-delete-url="{% url 'cooking:delete_comment' comment.pk %}">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                {% endif %}
                             </div>
-                            {% endif %}
                         </div>
 
-                        <!-- Класс comment-text нужен, чтобы JS менял текст -->
                         <p class="mb-0 mt-2 comment-text">{{ comment.text }}</p>
                     </div>
                 </div>
@@ -158,108 +157,108 @@
 
 <!-- Модальное окно для редактирования -->
 <div class="modal fade" id="editCommentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="editCommentForm">
-          <div class="modal-header">
-            <h5 class="modal-title">Редактировать комментарий</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <textarea class="form-control" id="editCommentText" rows="3" required></textarea>
-            <input type="hidden" id="editCommentId">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-            <button type="submit" class="btn btn-primary">Сохранить</button>
-          </div>
-      </form>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editCommentForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать комментарий</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="editCommentText" rows="3" required></textarea>
+                    <input type="hidden" id="editCommentId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Получаем CSRF токен из куки
-    const getCookie = (name) => {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+    document.addEventListener("DOMContentLoaded", function () {
+        // Получаем CSRF токен из куки
+        const getCookie = (name) => {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
-        }
-        return cookieValue;
-    };
-    const csrftoken = getCookie('csrftoken');
+            return cookieValue;
+        };
+        const csrftoken = getCookie('csrftoken');
 
-    // --- 1. РЕДАКТИРОВАНИЕ ---
-    const editModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
+        // --- 1. РЕДАКТИРОВАНИЕ ---
+        const editModal = new bootstrap.Modal(document.getElementById('editCommentModal'));
 
-    // Открытие модалки по клику на карандаш
-    document.querySelectorAll('.edit-comment-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('editCommentId').value = this.dataset.commentId;
-            document.getElementById('editCommentText').value = this.dataset.commentText;
-            editModal.show();
+        // Открытие модалки по клику на карандаш
+        document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('editCommentId').value = this.dataset.commentId;
+                document.getElementById('editCommentText').value = this.dataset.commentText;
+                editModal.show();
+            });
         });
-    });
 
-    // Отправка формы редактирования
-    document.getElementById('editCommentForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+        // Отправка формы редактирования
+        document.getElementById('editCommentForm').addEventListener('submit', function (e) {
+            e.preventDefault();
 
-        const commentId = document.getElementById('editCommentId').value;
-        const text = document.getElementById('editCommentText').value;
-        // Берем URL прямо из кнопки, которую нажали
-        const updateUrl = document.querySelector(`.edit-comment-btn[data-comment-id="${commentId}"]`).dataset.updateUrl;
+            const commentId = document.getElementById('editCommentId').value;
+            const text = document.getElementById('editCommentText').value;
+            // Берем URL прямо из кнопки, которую нажали
+            const updateUrl = document.querySelector(`.edit-comment-btn[data-comment-id="${commentId}"]`).dataset.updateUrl;
 
-        fetch(updateUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `text=${encodeURIComponent(text)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const commentDiv = document.getElementById(`comment-${commentId}`);
-                commentDiv.querySelector('.comment-text').innerText = data.new_text;
-                commentDiv.querySelector('.comment-edited-badge').style.display = 'inline';
-                editModal.hide();
-            } else {
-                alert('Ошибка валидации. Проверьте текст.');
-            }
-        });
-    });
-
-    // --- 2. УДАЛЕНИЕ ---
-    document.querySelectorAll('.delete-comment-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (!confirm('Удалить этот комментарий?')) return;
-
-            const commentId = this.dataset.commentId;
-            const deleteUrl = this.dataset.deleteUrl;
-
-            fetch(deleteUrl, {
+            fetch(updateUrl, {
                 method: 'POST',
-                headers: {'X-CSRFToken': csrftoken}
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `text=${encodeURIComponent(text)}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById(`comment-${commentId}`).remove();
-                }
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const commentDiv = document.getElementById(`comment-${commentId}`);
+                        commentDiv.querySelector('.comment-text').innerText = data.new_text;
+                        commentDiv.querySelector('.comment-edited-badge').style.display = 'inline';
+                        editModal.hide();
+                    } else {
+                        alert('Ошибка валидации. Проверьте текст.');
+                    }
+                });
+        });
+
+        // --- 2. УДАЛЕНИЕ ---
+        document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                if (!confirm('Удалить этот комментарий?')) return;
+
+                const commentId = this.dataset.commentId;
+                const deleteUrl = this.dataset.deleteUrl;
+
+                fetch(deleteUrl, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': csrftoken}
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById(`comment-${commentId}`).remove();
+                        }
+                    });
             });
         });
     });
-});
 </script>
 
 {% endblock %}
