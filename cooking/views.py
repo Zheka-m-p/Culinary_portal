@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.http import JsonResponse
 
 from .models import Category, Post, Comment
 from django.db.models import F, Q
@@ -141,3 +142,37 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         '''Возвращаем URL поста + якорь #comments'''
         return self.object.get_absolute_url() + '#comments'
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    # Если форма успешно сохранена - возвращаем JSON
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({
+            'success': True,
+            'new_text': self.object.text,
+            'updated_at': self.object.updated_at.strftime('%d.%m.%Y %H:%M'),
+        })
+
+    # Если ошибка в форме - возвращаем JSON с ошибками
+    def form_invalid(self, form):
+        return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    # Просто удаляем и возвращаем успех
+    def form_valid(self, form):
+        self.object = self.get_object()
+        self.object.delete()
+        return JsonResponse({'success': True})
